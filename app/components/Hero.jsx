@@ -2,6 +2,7 @@ import React from "react";
 import { GrSend } from "react-icons/gr";
 import { VscGraphLine } from "react-icons/vsc";
 import { FaLink, FaMagnifyingGlassChart } from "react-icons/fa6";
+import { gsap } from "gsap";
 
 export default function Hero() {
   return (

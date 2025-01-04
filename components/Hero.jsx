@@ -2,23 +2,53 @@
 import React, { useState, useRef, useEffect } from "react";
 import { GrSend } from "react-icons/gr";
 import { VscGraphLine } from "react-icons/vsc";
-import { FaLink, FaMagnifyingGlassChart } from "react-icons/fa6";
+import { FaLink, FaMagnifyingGlassChart, } from "react-icons/fa6";
+import { CgSpinner } from "react-icons/cg";
 import { gsap } from "gsap";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function Hero() {
   const [showOutput, setShowOutput] = useState(false);
+  const [inputText, setInputText] = useState("");
+  const [outputText, setOutputText] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const contentRef = useRef(null);
   const outputRef = useRef(null);
 
-  const handleSendClick = () => {
-    console.log("Send button clicked!");
+  const GetResponse = async () => {
+    if(inputText !== ""){
+      setLoading(true);
+      const response = await fetch("/api/get-response", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ inputValue: inputText }),
+      });
+      const data = await response.json();
+      // console.log(data);
+      if(data?.success === true){
+        setOutputText(data?.output);
+      }else{
+        setOutputText("Sorry, I am not able to process your request right now. Please try again later.");
+      }
+      setLoading(false);
+    }else{
+      setOutputText("Hello, *I am your assistant*. How can I help you today?");
+    }
+  }
 
-    
+  const handleSendClick = async () => {
+    // console.log(inputText);
+    GetResponse();
     gsap.to(contentRef.current, {
       opacity: 0,
-      y: -50,
-      duration: 0.5,
+      y: -100,
+      scale: 1,
+      animation: "ease-in-out",
+      duration: 0.3,
       onComplete: () => {
         setShowOutput(true);
       },
@@ -31,7 +61,7 @@ export default function Hero() {
       gsap.fromTo(
         outputRef.current,
         { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 0.5 }
+        { opacity: 1, y: 0, duration: 0.3 }
       );
     }
   }, [showOutput]);
@@ -40,10 +70,10 @@ export default function Hero() {
     <div className="flex flex-col items-center justify-center py-10 px-10 min-h-screen bg-gradient-to-r from-white via-orange-100 to-pink-200 w-screen pb-5">
       
       {!showOutput ? (
-        <div ref={contentRef} className="content flex flex-col items-center justify-center w-full transition-all duration-500 ease-in-out">
-          <div className="flex flex-col items-center justify-center md:w-[70%] w-full mt-24 gap-5">
-            <h1 className="md:text-3xl text-xl font-bold text-gray-600">Hi👋 user,</h1>
-            <h1 className="md:text-5xl text-3xl font-bold text-black text-wrap text-center">
+        <div ref={contentRef} className="content flex flex-col items-center justify-center w-full">
+          <div className="flex flex-col items-center justify-center md:w-[70%] w-full mt-10 gap-5">
+            <h1 className="md:text-2xl text-xl font-bold text-gray-600">Hi👋 user,</h1>
+            <h1 className="md:text-4xl text-2xl font-bold text-black text-wrap text-center">
               Want help with your Social Media Insights?
             </h1>
             <p className="text-gray-600 text-center font-thin text-lg mb-5">
@@ -52,7 +82,7 @@ export default function Hero() {
             </p>
           </div>
 
-          <div className="flex flex-col items-center justify-center md:w-[60%] w-full mt-32">
+          <div className="flex flex-col items-center justify-center md:w-[70%] w-full mt-20">
             <div className="flex w-full items-center justify-between overflow-x-scroll gap-4">
               <div className="bg-white p-6 border rounded-2xl h-[200px] md:w-[250px] min-w-[250px] flex flex-col items-start justify-between">
                 <VscGraphLine className="text-5xl text-white bg-gray-800 p-2 rounded-xl" />
@@ -77,21 +107,28 @@ export default function Hero() {
           ref={outputRef}
           className="output w-full flex flex-col items-center justify-center h-full mt-0 opacity-100 transition-all duration-500 ease-in-out"
         >
-          <textarea
-            className="w-[90%] md:w-[70%] h-[280px] p-4 text-lg placeholder-gray-500 border rounded-lg shadow-md opacity-100 transition-all duration-500 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-300"
-            placeholder="Output prompt will appear here..."
-          ></textarea>
+          <div
+            className="w-[90%] md:w-[70%] h-[380px] p-4 text-lg border rounded-lg shadow-md bg-white overflow-y-scroll"
+          >
+            {loading?<p className="animate-pulse text-gray-600 text-left text-lg">
+              getting response...
+            </p>:
+              <Markdown rehypePlugins={[remarkGfm]}>{outputText}</Markdown>
+            }
+          </div>
         </div>
       )}
 
   
-      <div className="flex items-center justify-between bg-white h-fit p-2 mt-10 rounded-full w-[80%] md:w-[50%]">
+      <div className="flex items-center justify-between bg-white h-fit p-2 mt-10 rounded-full w-[100%] md:w-[70%]">
         <input
           type="text"
           placeholder="Ask Anything..."
           className="w-full flex-1 bg-white rounded-3xl py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
         />
-        <button
+        {!loading?<button
           onClick={handleSendClick}
           className="flex text-xl items-center justify-center ml-2 px-4 py-2 bg-orange-400 rounded-3xl font-bold text-white hover:text-gray-700 hover:bg-gray-400 active:bg-gray-500 transition-all duration-500 ease-in-out w-[50px] group hover:w-[120px]"
         >
@@ -99,7 +136,9 @@ export default function Hero() {
           <span className="text-[0px] text-gray-700 transition-all duration-500 ease-in-out group-hover:text-lg group-hover:ml-2">
             send
           </span>
-        </button>
+        </button>:<button className="bg-gray-700 p-2 rounded-full w-[40px] h-[40px] flex items-center justify-center">
+          <CgSpinner className="animate-spin text-2xl text-white" />  
+        </button>}
       </div>
     </div>
   );

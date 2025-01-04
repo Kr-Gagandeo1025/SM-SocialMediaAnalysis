@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { GrSend } from "react-icons/gr";
+import { GrSave, GrSend } from "react-icons/gr";
 import { VscGraphLine } from "react-icons/vsc";
-import { FaLink, FaMagnifyingGlassChart, } from "react-icons/fa6";
+import { FaCopy, FaLink, FaMagnifyingGlassChart, } from "react-icons/fa6";
 import { CgSpinner } from "react-icons/cg";
 import { gsap } from "gsap";
 import Markdown from "react-markdown";
@@ -13,6 +13,7 @@ export default function Hero() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [actionButtons, setActionButtons] = useState(false);
 
   const contentRef = useRef(null);
   const outputRef = useRef(null);
@@ -31,12 +32,14 @@ export default function Hero() {
       // console.log(data);
       if(data?.success === true){
         setOutputText(data?.output);
+        setActionButtons(true);
       }else{
         setOutputText("Sorry, I am not able to process your request right now. Please try again later.");
       }
       setLoading(false);
     }else{
       setOutputText("Hello, *I am your assistant*. How can I help you today?");
+      setActionButtons(true);
     }
   }
 
@@ -119,8 +122,17 @@ export default function Hero() {
         </div>
       )}
 
+      {actionButtons&&<div className="flex items-center justify-end gap-3 h-fit p-2 mt-1 rounded-full w-[100%] md:w-[70%]">
+        <button>
+          <FaCopy className="text-3xl text-white bg-gray-800 p-2 rounded-xl" />
+        </button>
+        <button>
+          <GrSave className="text-3xl text-white bg-gray-800 p-2 rounded-xl" />
+        </button>
+      </div>}
+
   
-      <div className="flex items-center justify-between bg-white h-fit p-2 mt-10 rounded-full w-[100%] md:w-[70%]">
+      <div className="flex items-center justify-between bg-white h-fit p-2 mt-5 rounded-full w-[100%] md:w-[70%]">
         <input
           type="text"
           placeholder="Ask Anything..."

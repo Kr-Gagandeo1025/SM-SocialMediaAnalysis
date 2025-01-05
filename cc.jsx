@@ -2,11 +2,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { GrSave, GrSend } from "react-icons/gr";
 import { VscGraphLine } from "react-icons/vsc";
-import { FaCopy, FaCheck, FaLink, FaMagnifyingGlassChart } from "react-icons/fa6";
+import { FaCopy, FaLink, FaMagnifyingGlassChart } from "react-icons/fa6";
 import { CgSpinner } from "react-icons/cg";
 import { gsap } from "gsap";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import mockResponse from "./utils/mockResponse"; // Import mock response
 
 export default function Hero() {
   const [showOutput, setShowOutput] = useState(false);
@@ -14,7 +15,6 @@ export default function Hero() {
   const [outputText, setOutputText] = useState("");
   const [loading, setLoading] = useState(false);
   const [actionButtons, setActionButtons] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const contentRef = useRef(null);
   const outputRef = useRef(null);
@@ -22,35 +22,45 @@ export default function Hero() {
   const GetResponse = async () => {
     if (inputText !== "") {
       setLoading(true);
-      const apiUrl =
-        process.env.NODE_ENV === "development"
-          ? "http://localhost:3000/api/get-response"
-          : "https://your-production-url/api/get-response";
 
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ inputValue: inputText }),
-        });
-
-        if (!response.ok) throw new Error("API call failed.");
-
-        const data = await response.json();
-        if (data?.success) {
-          setOutputText(data?.output);
+      // If in development, use the mock response, otherwise call the real API
+      if (process.env.NODE_ENV === "development") {
+        setTimeout(() => {
+          setOutputText(mockResponse.outputs[0].outputs[0].text);
           setActionButtons(true);
-        } else {
-          setOutputText("Sorry, I am not able to process your request right now. Please try again later.");
-        }
-      } catch (error) {
-        console.error("Error fetching response:", error);
-        setOutputText("An error occurred while fetching the response. Please try again later.");
-      }
+          setLoading(false);
+        }, 1000); // Mock delay
+      } else {
+        const apiUrl =
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:3000/api/get-response" // Local development URL
+            : "https://your-production-url/api/get-response"; // Production URL
 
-      setLoading(false);
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ inputValue: inputText }),
+          });
+
+          if (!response.ok) throw new Error("API call failed.");
+
+          const data = await response.json();
+          if (data?.success) {
+            setOutputText(data?.output);
+            setActionButtons(true);
+          } else {
+            setOutputText("Sorry, I am not able to process your request right now. Please try again later.");
+          }
+        } catch (error) {
+          console.error("Error fetching response:", error);
+          setOutputText("An error occurred while fetching the response. Please try again later.");
+        }
+
+        setLoading(false);
+      }
     } else {
       setOutputText("Hello, *I am your assistant*. How can I help you today?");
       setActionButtons(true);
@@ -63,27 +73,12 @@ export default function Hero() {
       opacity: 0,
       y: -100,
       scale: 1,
+      animation: "ease-in-out",
       duration: 0.3,
       onComplete: () => {
         setShowOutput(true);
       },
     });
-  };
-
-  const handleCopy = () => {
-    if (outputText) {
-      navigator.clipboard.writeText(outputText).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      });
-    }
-  };
-
-  const handleSave = () => {
-    if (outputText) {
-      localStorage.setItem("savedPrompt", outputText);
-      alert("Prompt saved successfully!");
-    }
   };
 
   useEffect(() => {
@@ -100,7 +95,6 @@ export default function Hero() {
     <div className="flex flex-col items-center justify-center py-10 px-10 min-h-screen bg-gradient-to-r from-white via-orange-100 to-pink-200 w-screen pb-5">
       {!showOutput ? (
         <div ref={contentRef} className="content flex flex-col items-center justify-center w-full">
-          {/* Greeting and Insights */}
           <div className="flex flex-col items-center justify-center md:w-[70%] w-full mt-10 gap-5">
             <h1 className="md:text-2xl text-xl font-bold text-gray-600">Hi👋 user,</h1>
             <h1 className="md:text-4xl text-2xl font-bold text-black text-wrap text-center">
@@ -112,7 +106,6 @@ export default function Hero() {
             </p>
           </div>
 
-          {/* Insights Cards */}
           <div className="flex flex-col items-center justify-center md:w-[70%] w-full mt-20">
             <div className="flex w-full items-center justify-between overflow-x-scroll gap-4">
               <div className="bg-white p-6 border rounded-2xl h-[200px] md:w-[250px] min-w-[250px] flex flex-col items-start justify-between">
@@ -138,9 +131,11 @@ export default function Hero() {
           ref={outputRef}
           className="output w-full flex flex-col items-center justify-center h-full mt-0 opacity-100 transition-all duration-500 ease-in-out"
         >
-          <div className="w-[90%] md:w-[70%] h-[300px] p-4 text-lg border rounded-lg shadow-md bg-white overflow-y-scroll">
+          <div
+            className="w-[90%] md:w-[70%] h-[380px] p-4 text-lg border rounded-lg shadow-md bg-white overflow-y-scroll"
+          >
             {loading ? (
-              <p className="animate-pulse text-gray-600 text-left text-lg">Getting response...</p>
+              <p className="animate-pulse text-gray-600 text-left text-lg">getting response...</p>
             ) : (
               <Markdown rehypePlugins={[remarkGfm]}>{outputText}</Markdown>
             )}
@@ -148,23 +143,17 @@ export default function Hero() {
         </div>
       )}
 
-      {/* Save and Copy Buttons */}
       {actionButtons && (
         <div className="flex items-center justify-end gap-3 h-fit p-2 mt-1 rounded-full w-[100%] md:w-[70%]">
-          <button onClick={handleCopy}>
-            {copied ? (
-              <FaCheck className="text-3xl text-green-500" />
-            ) : (
-              <FaCopy className="text-3xl text-white bg-gray-800 p-2 rounded-xl" />
-            )}
+          <button>
+            <FaCopy className="text-3xl text-white bg-gray-800 p-2 rounded-xl" />
           </button>
-          <button onClick={handleSave}>
+          <button>
             <GrSave className="text-3xl text-white bg-gray-800 p-2 rounded-xl" />
           </button>
         </div>
       )}
 
-      {/* Input and Send Button */}
       <div className="flex items-center justify-between bg-white h-fit p-2 mt-5 rounded-full w-[100%] md:w-[70%]">
         <input
           type="text"
@@ -180,7 +169,7 @@ export default function Hero() {
           >
             <GrSend className="text-xl" />
             <span className="text-[0px] text-gray-700 transition-all duration-500 ease-in-out group-hover:text-lg group-hover:ml-2">
-              Send
+              send
             </span>
           </button>
         ) : (

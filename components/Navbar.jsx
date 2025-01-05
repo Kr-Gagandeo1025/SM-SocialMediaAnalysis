@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { generateUsername } from "unique-username-generator";
 import { FiSidebar } from "react-icons/fi";
+import Link from "next/link";
+import { FaGithub } from "react-icons/fa6";
 
 
 export default function Navbar({sidebaraction, sidebarstate}) {
@@ -20,8 +22,13 @@ export default function Navbar({sidebaraction, sidebarstate}) {
             <h1 className="text-sm font-bold text-gray-600">Hi👋 {username}</h1>
           </div>
         </div>
-        <div className="flex items-center justify-center p-2 bg-white rounded-full cursor-pointer" onClick={()=>sidebaraction(!sidebarstate)}>
-          <FiSidebar className="text-2xl"/>
+        <div className="flex items-center justify-center gap-4">
+          <Link href="https://github.com/Kr-Gagandeo1025/SM-SocialMediaAnalysis" target="_blank" className="p-2 bg-white rounded-full">
+            <FaGithub className="text-2xl text-black"/>
+          </Link>
+          <div className="flex items-center justify-center p-2 bg-white rounded-full cursor-pointer" onClick={()=>sidebaraction(!sidebarstate)}>
+            <FiSidebar className="text-2xl"/>
+          </div>
         </div>
       </div>
     </div>

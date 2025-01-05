@@ -22,21 +22,14 @@ export default function Hero() {
   const GetResponse = async () => {
     if (inputText !== "") {
       setLoading(true);
-      const apiUrl =
-        process.env.NODE_ENV === "development"
-          ? "http://localhost:3000/api/get-response"
-          : "https://your-production-url/api/get-response";
-
       try {
-        const response = await fetch(apiUrl, {
+        const response = await fetch("/api/get-response", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ inputValue: inputText }),
         });
-
-        if (!response.ok) throw new Error("API call failed.");
 
         const data = await response.json();
         if (data?.success) {

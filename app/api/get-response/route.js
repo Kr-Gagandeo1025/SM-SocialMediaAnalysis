@@ -74,10 +74,10 @@ class LangflowClient {
 }
 
 // Environment variables
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-const APPLICATION_TOKEN = process.env.NEXT_PUBLIC_APPLICATION_TOKEN;
-const FLOW_ID = process.env.NEXT_PUBLIC_FLOW_ID;
-const LANGFLOW_ID = process.env.NEXT_PUBLIC_LANGFLOW_ID;
+const BASE_URL = process.env.BASE_URL;
+const APPLICATION_TOKEN = process.env.APPLICATION_TOKEN;
+const FLOW_ID = process.env.FLOW_ID;
+const LANGFLOW_ID = process.env.LANGFLOW_ID;
 
 // API Route
 export async function POST(req) {

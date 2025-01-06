@@ -104,8 +104,8 @@ export default function Hero() {
               So let's get started!
             </p>
             <p className="bg-gray-500 py-2 px-4 font-thin rounded-2xl text-white">
-              powered by :
-              DATASTAX & LANGFLOW
+              POWERED BY :
+              DATASTAX ASTRA DB & LANGFLOW
             </p>
           </div>
 
